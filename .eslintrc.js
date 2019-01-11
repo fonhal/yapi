@@ -26,6 +26,14 @@ module.exports = {
         "import/no-unresolved": ["off"],
         "react/no-find-dom-node": ["off"]
         // "react/no-unescaped-entities": 0
+    },
+    "settings": {
+        "react": {
+       
+          "pragma": "React",  // Pragma to use, default to "React"
+          "version": "detect", // React version. "detect" automatically picks the version you have installed.
+                               // You can also use `16.0`, `16.3`, etc, if you want to override the detected value.
+        }
     }
 };
 

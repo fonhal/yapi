@@ -1,16 +1,16 @@
-var path = require('path');
-var AssetsPlugin = require('assets-webpack-plugin');
-var CompressionPlugin = require('compression-webpack-plugin');
-var commonLib = require('./common/plugin.js');
+var path = require('path')
+var AssetsPlugin = require('assets-webpack-plugin')
+var CompressionPlugin = require('compression-webpack-plugin')
+var commonLib = require('./common/plugin.js')
 var assetsPluginInstance = new AssetsPlugin({
   filename: 'static/prd/assets.js',
   processOutput: function(assets) {
-    return 'window.WEBPACK_ASSETS = ' + JSON.stringify(assets);
+    return 'window.WEBPACK_ASSETS = ' + JSON.stringify(assets)
   }
-});
-var fs = require('fs');
-var package = require('./package.json');
-var yapi = require('./server/yapi');
+})
+var fs = require('fs')
+var package = require('./package.json')
+var yapi = require('./server/yapi')
 
 var compressPlugin = new CompressionPlugin({
   asset: '[path].gz[query]',
@@ -18,46 +18,42 @@ var compressPlugin = new CompressionPlugin({
   test: /\.(js|css)$/,
   threshold: 10240,
   minRatio: 0.8
-});
+})
 
 function createScript(plugin, pathAlias) {
-  let options = plugin.options ? JSON.stringify(plugin.options) : null;
+  let options = plugin.options ? JSON.stringify(plugin.options) : null
   if (pathAlias === 'node_modules') {
-    return `"${plugin.name}" : {module: require('yapi-plugin-${
-      plugin.name
-    }/client.js'),options: ${options}}`;
+    return `"${plugin.name}" : {module: require('yapi-plugin-${plugin.name}/client.js'),options: ${options}}`
   }
-  return `"${plugin.name}" : {module: require('${pathAlias}/yapi-plugin-${
-    plugin.name
-  }/client.js'),options: ${options}}`;
+  return `"${plugin.name}" : {module: require('${pathAlias}/yapi-plugin-${plugin.name}/client.js'),options: ${options}}`
 }
 
 function initPlugins(configPlugin) {
-  configPlugin = require('../config.json').plugins;
-  var systemConfigPlugin = require('./common/config.js').exts;
+  configPlugin = require('../config.json').plugins
+  var systemConfigPlugin = require('./common/config.js').exts
 
-  var scripts = [];
+  var scripts = []
   if (configPlugin && Array.isArray(configPlugin) && configPlugin.length) {
-    configPlugin = commonLib.initPlugins(configPlugin, 'plugin');
+    configPlugin = commonLib.initPlugins(configPlugin, 'plugin')
     configPlugin.forEach(plugin => {
       if (plugin.client && plugin.enable) {
-        scripts.push(createScript(plugin, 'node_modules'));
+        scripts.push(createScript(plugin, 'node_modules'))
       }
-    });
+    })
   }
 
-  systemConfigPlugin = commonLib.initPlugins(systemConfigPlugin, 'ext');
+  systemConfigPlugin = commonLib.initPlugins(systemConfigPlugin, 'ext')
   systemConfigPlugin.forEach(plugin => {
     if (plugin.client && plugin.enable) {
-      scripts.push(createScript(plugin, 'exts'));
+      scripts.push(createScript(plugin, 'exts'))
     }
-  });
+  })
 
-  scripts = 'module.exports = {' + scripts.join(',') + '}';
-  fs.writeFileSync('client/plugin-module.js', scripts);
+  scripts = 'module.exports = {' + scripts.join(',') + '}'
+  fs.writeFileSync('client/plugin-module.js', scripts)
 }
 
-initPlugins();
+initPlugins()
 
 module.exports = {
   plugins: [
@@ -66,23 +62,34 @@ module.exports = {
       options: {
         modifyQuery: function(defaultQuery) {
           // 可查看和编辑 defaultQuery
-          defaultQuery.plugins = [];
+          defaultQuery.plugins = []
           defaultQuery.plugins.push([
             'transform-runtime',
             {
               polyfill: false,
               regenerator: true
             }
-          ]);
-          defaultQuery.plugins.push('transform-decorators-legacy');
-          defaultQuery.plugins.push(['import', { libraryName: 'antd' }]);
-          return defaultQuery;
+          ])
+          defaultQuery.plugins.push([
+            'transform-class-properties',
+            {
+              spec: true
+            }
+          ])
+          defaultQuery.plugins.push('transform-decorators-legacy')
+          defaultQuery.plugins.push([
+            'import',
+            {
+              libraryName: 'antd'
+            }
+          ])
+          return defaultQuery
         },
         exclude: /(tui-editor|node_modules\/(?!_?(yapi-plugin|json-schema-editor-visual)))/
       }
     }
   ],
-  devtool: 'cheap-source-map',
+  devtool: '#source-map',
   config: function(ykit) {
     return {
       exports: ['./index.js'],
@@ -108,17 +115,17 @@ module.exports = {
         }
       },
       modifyWebpackConfig: function(baseConfig) {
-        var ENV_PARAMS = {};
+        var ENV_PARAMS = {}
         switch (this.env) {
           case 'local':
-            ENV_PARAMS = 'dev';
-            break;
+            ENV_PARAMS = 'dev'
+            break
           case 'dev':
-            ENV_PARAMS = 'dev';
-            break;
+            ENV_PARAMS = 'dev'
+            break
           case 'prd':
-            ENV_PARAMS = 'production';
-            break;
+            ENV_PARAMS = 'production'
+            break
           default:
         }
 
@@ -128,34 +135,31 @@ module.exports = {
             'process.env.version': JSON.stringify(package.version),
             'process.env.versionNotify': yapi.WEBCONFIG.versionNotify
           })
-        );
+        )
 
         //初始化配置
-        baseConfig.devtool = 'cheap-module-eval-source-map';
-        baseConfig.context = path.resolve(__dirname, './client');
-        baseConfig.resolve.alias.client = '/client';
-        baseConfig.resolve.alias.common = '/common';
+        baseConfig.devtool = 'eval-source-map' //cheap-module-eval-
+        baseConfig.context = path.resolve(__dirname, './client')
+        baseConfig.resolve.alias.client = '/client'
+        baseConfig.resolve.alias.common = '/common'
 
-        baseConfig.resolve.alias.exts = '/exts';
+        baseConfig.resolve.alias.exts = '/exts'
 
         // baseConfig.resolve.alias.react = 'anujs';
         // baseConfig.resolve.alias['react-dom'] = 'anujs';
 
-        baseConfig.output.prd.path = 'static/prd';
-        baseConfig.output.prd.publicPath = '';
-        baseConfig.output.prd.filename = '[name]@[chunkhash][ext]';
+        baseConfig.output.prd.path = 'static/prd'
+        baseConfig.output.prd.publicPath = ''
+        baseConfig.output.prd.filename = '[name]@[chunkhash][ext]'
 
-        baseConfig.module.noParse = /node_modules\/jsondiffpatch\/public\/build\/.*js/;
+        baseConfig.module.noParse = /node_modules\/jsondiffpatch\/public\/build\/.*js/
         baseConfig.module.loaders.push({
           test: /\.less$/,
           loader: ykit.ExtractTextPlugin.extract(
             require.resolve('style-loader'),
-            require.resolve('css-loader') +
-              '?sourceMap!' +
-              require.resolve('less-loader') +
-              '?sourceMap'
+            require.resolve('css-loader') + '?sourceMap!' + require.resolve('less-loader') + '?sourceMap'
           )
-        });
+        })
 
         baseConfig.module.loaders.push({
           test: /.(gif|jpg|jpeg|png|woff|woff2|eot|ttf|svg)$/,
@@ -164,46 +168,46 @@ module.exports = {
             limit: 8192,
             name: ['[path][name].[ext]?[sha256#base64:8]']
           }
-        });
+        })
 
         baseConfig.module.loaders.push({
           test: /\.(sass|scss)$/,
-          loader: ykit.ExtractTextPlugin.extract(
-            require.resolve('css-loader') +
-              '?sourceMap!' +
-              require.resolve('sass-loader') +
-              '?sourceMap'
-          )
-        });
+          loader: ykit.ExtractTextPlugin.extract(require.resolve('css-loader') + '?sourceMap!' + require.resolve('sass-loader') + '?sourceMap')
+        })
 
         baseConfig.module.preLoaders.push({
           test: /\.(js|jsx)$/,
           exclude: /tui-editor|node_modules|google-diff.js/,
           loader: 'eslint-loader'
-        });
+        })
 
         baseConfig.module.preLoaders.push({
           test: /\.json$/,
           loader: 'json-loader'
-        });
+        })
 
         if (this.env == 'prd') {
-          baseConfig.plugins.push(
+         /*  baseConfig.plugins.push(
             new this.webpack.optimize.UglifyJsPlugin({
               compress: {
                 warnings: false
               }
             })
-          );
-          baseConfig.plugins.push(assetsPluginInstance);
-          baseConfig.plugins.push(compressPlugin);
-          baseConfig.plugins.push(
-            new this.webpack.ContextReplacementPlugin(/moment[\\\/]locale$/, /^\.\/(zh-cn|en-gb)$/)
-          );
+          ) */
+          baseConfig.plugins.push(assetsPluginInstance)
+          /* baseConfig.plugins.push(compressPlugin) */
+          baseConfig.plugins.push(new this.webpack.ContextReplacementPlugin(/moment[\\\/]locale$/, /^\.\/(zh-cn|en-gb)$/))
         }
-        return baseConfig;
+        return baseConfig
       }
-    };
+    }
+  },
+  build: {
+    uglifyjs: {
+      squeeze: {
+        dead_code: true
+      }
+    }
   },
   server: {
     // true/false，默认 false，效果相当于 ykit server --hot
@@ -213,4 +217,4 @@ module.exports = {
   },
   hooks: {},
   commands: []
-};
+}
