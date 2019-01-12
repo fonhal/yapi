@@ -42,16 +42,17 @@ class FootItem extends Component {
           {' '}
           {this.props.iconType ? <Icon type={this.props.iconType} className="icon" /> : ''} {this.props.title}{' '}
         </h4>{' '}
-        {this.props.linkList.map(function(item, i) {
-          return (
-            <p key={i}>
-              <a href={item.itemLink} className="link">
-                {' '}
-                {item.itemTitle}{' '}
-              </a>{' '}
-            </p>
-          )
-        })}{' '}
+        {this.props.linkList &&
+          this.props.linkList.map(function(item, i) {
+            return (
+              <p key={i}>
+                <a href={item.itemLink} className="link">
+                  {' '}
+                  {item.itemTitle}{' '}
+                </a>{' '}
+              </p>
+            )
+          })}{' '}
       </Col>
     )
   }
