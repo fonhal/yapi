@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { Row, Col } from 'antd';
 import { Icon } from 'antd';
 
-const version = process.env.version;
+/* const version = process.env.version; */
 class Footer extends Component {
   constructor(props) {
     super(props);
