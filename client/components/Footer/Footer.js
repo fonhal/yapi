@@ -64,7 +64,7 @@ class FootItem extends Component {
 
 Footer.defaultProps = {
   footList: [
-    {
+    /* {
       title: 'GitHub',
       iconType: 'github',
       linkList: [
@@ -83,7 +83,7 @@ Footer.defaultProps = {
           itemLink: 'https://ymfe.org'
         }
       ]
-    },
+    }, */
     {
       title: '反馈',
       iconType: 'aliwangwang-o',
