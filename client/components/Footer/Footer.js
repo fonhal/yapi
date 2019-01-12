@@ -43,7 +43,7 @@ class FootItem extends Component {
   };
   render() {
     return (
-      <Col span={6}>
+      <Col span={24}>
         <h4 className="title">
           {this.props.iconType ? <Icon type={this.props.iconType} className="icon" /> : ''}
           {this.props.title}
@@ -83,7 +83,7 @@ Footer.defaultProps = {
           itemLink: 'https://ymfe.org'
         }
       ]
-    }, */
+    }, 
     {
       title: '反馈',
       iconType: 'aliwangwang-o',
@@ -97,10 +97,10 @@ Footer.defaultProps = {
           itemLink: 'https://github.com/YMFE/yapi/pulls'
         }
       ]
-    },
+    },*/
     {
-      title: 'Copyright © 2018 YMFE',
-      linkList: [
+      title: 'Copyright © 2018 CMS Web Group',
+      /* linkList: [
         {
           itemTitle: `版本: ${version} `,
           itemLink: 'https://github.com/YMFE/yapi/blob/master/CHANGELOG.md'
@@ -109,7 +109,7 @@ Footer.defaultProps = {
           itemTitle: '使用文档',
           itemLink: 'https://yapi.ymfe.org'
         }
-      ]
+      ] */
     }
   ]
 };
