@@ -73,6 +73,7 @@ class statisMockModel extends baseModel {
       ])
       .cursor({})
       .exec()
+    console.log(result, ';;;;;;;;;;;;;;;;')
     return result
   }
 
