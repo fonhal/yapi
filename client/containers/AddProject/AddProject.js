@@ -114,7 +114,11 @@ class ProjectList extends Component {
                 rules: nameLengthLimit('项目')
               })(<Input />)}
             </FormItem>
-
+            <FormItem {...formItemLayout} label="项目代码">
+              {getFieldDecorator('code', {
+                rules: nameLengthLimit('项目代码')
+              })(<Input />)}
+            </FormItem>
             <FormItem {...formItemLayout} label="所属分组">
               {getFieldDecorator('group', {
                 initialValue: this.state.currGroupId + '',
