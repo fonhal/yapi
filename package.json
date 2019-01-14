@@ -1,3 +1,4 @@
+
 {
   "name": "cmsapi-vendor",
   "version": "1.0.0",
@@ -150,6 +151,24 @@
     "ydoc-plugin-img-view": "^1.0.1",
     "ykit": "0.8.10",
     "ykit-config-antd": "2.3.0"
+  },
+  "config": {
+    "validate-commit-msg": {
+      "types": [
+        "feat",
+        "fix",
+        "docs",
+        "test",
+        "chore",
+        "refactor",
+        "opti"
+      ],
+      "warnOnFail": false,
+      "maxSubjectLength": 100,
+      "subjectPattern": ".+",
+      "subjectPatternErrorMsg": "请输入message信息!",
+      "helpMessage": "Commit message 格式错误， http://www.ruanyifeng.com/blog/2016/01/commit_message_change_log.html"
+    }
   },
   "engines": {
     "node": ">= 7.6.0",
