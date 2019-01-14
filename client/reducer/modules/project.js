@@ -188,6 +188,7 @@ export function addProject(data) {
     basepath,
     desc,
     group_id,
+    code,
     group_name,
     protocol,
     icon,
@@ -199,6 +200,7 @@ export function addProject(data) {
   name = htmlFilter(name);
   const param = {
     name,
+    code,
     prd_host,
     protocol,
     basepath,
@@ -217,7 +219,7 @@ export function addProject(data) {
 
 // 修改项目
 export function updateProject(data) {
-  let { name, project_type, basepath, desc, _id, env, group_id, switch_notice, strice, is_json5, tag } = data;
+  let { name, project_type, basepath, desc, _id, env, group_id, code, switch_notice, strice, is_json5, tag } = data;
   
   // 过滤项目名称中有html标签存在的情况
   name = htmlFilter(name);
@@ -230,6 +232,7 @@ export function updateProject(data) {
     id: _id,
     env,
     group_id,
+    code,
     strice,
     is_json5,
     tag
