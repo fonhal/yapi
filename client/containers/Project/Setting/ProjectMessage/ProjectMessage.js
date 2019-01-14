@@ -235,7 +235,6 @@ class ProjectMessage extends Component {
     let initFormValues = {};
     const {
       name,
-      code,
       basepath,
       desc,
       project_type,
@@ -247,7 +246,6 @@ class ProjectMessage extends Component {
     } = projectMsg;
     initFormValues = {
       name,
-      code,
       basepath,
       desc,
       project_type,
@@ -324,19 +322,6 @@ class ProjectMessage extends Component {
               {getFieldDecorator('name', {
                 initialValue: initFormValues.name,
                 rules: nameLengthLimit('项目')
-              })(<Input />)}
-            </FormItem>
-            <FormItem {...formItemLayout} label={
-              <span>
-                项目代码&nbsp;
-                <Tooltip title="数据上报时使用的系统编码，项目代码必须唯一。">
-                  <Icon type="question-circle-o" />
-                </Tooltip>
-              </span>
-              }>
-              {getFieldDecorator('code', {
-                initialValue: initFormValues.code,
-                rules: nameLengthLimit('项目代码')
               })(<Input />)}
             </FormItem>
             <FormItem {...formItemLayout} label="所属分组">
