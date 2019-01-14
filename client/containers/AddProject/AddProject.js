@@ -115,12 +115,12 @@ class ProjectList extends Component {
               })(<Input />)}
             </FormItem>
             <FormItem {...formItemLayout} label={
-                <span>
-                  项目代码&nbsp;
-                  <Tooltip title="数据上报时使用的系统编码，项目代码必须唯一。">
-                    <Icon type="question-circle-o" />
-                  </Tooltip>
-                </span>
+              <span>
+                项目代码&nbsp;
+                <Tooltip title="数据上报时使用的系统编码，项目代码必须唯一。">
+                  <Icon type="question-circle-o" />
+                </Tooltip>
+              </span>
               }>
               {getFieldDecorator('code', {
                 rules: nameLengthLimit('项目代码')
