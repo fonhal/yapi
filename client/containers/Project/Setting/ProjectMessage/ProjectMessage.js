@@ -235,6 +235,7 @@ class ProjectMessage extends Component {
     let initFormValues = {};
     const {
       name,
+      code,
       basepath,
       desc,
       project_type,
@@ -246,6 +247,7 @@ class ProjectMessage extends Component {
     } = projectMsg;
     initFormValues = {
       name,
+      code,
       basepath,
       desc,
       project_type,
