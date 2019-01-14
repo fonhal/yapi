@@ -337,11 +337,10 @@ class ProjectMessage extends Component {
                 }
             >
               {getFieldDecorator('code', {
-                initialValue: initFormValues.code,
                 rules: [
                   {
-                    required: false,
-                    message: '请输入项目编码! '
+                    required: true,
+                    message: '请输入项目代码!'
                   }
                 ]
               })(<Input />)}
