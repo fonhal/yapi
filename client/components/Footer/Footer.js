@@ -95,7 +95,7 @@ Footer.defaultProps = {
       ]
     },*/
     {
-      title: 'Copyright © 2018 CMS Web Group'
+      title: 'Copyright © 2018 招商证券互联网开发部'
       /* linkList: [
         {
           itemTitle: `版本: ${version} `,
