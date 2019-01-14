@@ -337,7 +337,12 @@ class ProjectMessage extends Component {
                 }
             >
               {getFieldDecorator('code', {
-                rules: nameLengthLimit('项目代码')
+                rules: [
+                  {
+                    required: false,
+                    message: '请输入项目编码! '
+                  }
+                ]
               })(<Input />)}
             </FormItem>
             <FormItem {...formItemLayout} label="所属分组">
