@@ -333,6 +333,7 @@ class ProjectMessage extends Component {
               </span>
               }>
               {getFieldDecorator('code', {
+                initialValue: initFormValues.code,
                 rules: nameLengthLimit('项目代码')
               })(<Input />)}
             </FormItem>

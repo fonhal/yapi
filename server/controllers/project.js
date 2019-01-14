@@ -32,6 +32,10 @@ class projectController extends baseController {
       type: 'string',
       minLength: 1
     };
+    const code = {
+      type: 'string',
+      minLength: 3
+    }
     const role = {
       type: 'string',
       enum: ['owner', 'dev', 'guest']
@@ -56,6 +60,7 @@ class projectController extends baseController {
     this.schemaMap = {
       add: {
         '*name': name,
+        'code': code,
         basepath: basepath,
         '*group_id': group_id,
         group_name,
@@ -177,6 +182,7 @@ class projectController extends baseController {
    * @category project
    * @foldnumber 10
    * @param {String} name 项目名称，不能为空
+   * @param {String} code 项目代码，不能为空
    * @param {String} basepath 项目基本路径，不能为空
    * @param {Number} group_id 项目分组id，不能为空
    * @param {Number} group_name 项目分组名称，不能为空
@@ -206,6 +212,7 @@ class projectController extends baseController {
 
     let data = {
       name: params.name,
+      code: params.code,
       desc: params.desc,
       basepath: params.basepath,
       members: [],
@@ -776,6 +783,7 @@ class projectController extends baseController {
 
       params = yapi.commons.handleParams(params, {
         name: 'string',
+        code: 'string',
         basepath: 'string',
         group_id: 'number',
         desc: 'string',
@@ -1076,6 +1084,7 @@ class projectController extends baseController {
     let projectRules = [
       '_id',
       'name',
+      'code',
       'basepath',
       'uid',
       'env',
