@@ -337,6 +337,7 @@ class ProjectMessage extends Component {
                 }
             >
               {getFieldDecorator('code', {
+                initialValue: initFormValues.code,
                 rules: [
                   {
                     required: false,
