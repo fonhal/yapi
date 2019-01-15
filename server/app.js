@@ -41,8 +41,14 @@ app.use(async (ctx, next) => {
 });
 
 app.use(async (ctx, next) => {
+  let header = ctx.request.header;
+  //ctx.set('Access-Control-Allow-Origin', '*');
+  ctx.set('Access-Control-Allow-Origin', header.origin);
+  ctx.set('Access-Control-Allow-Credentials', true);
+  //console.log(ctx)
   if (ctx.path.indexOf('/prd') === 0) {
     ctx.set('Cache-Control', 'max-age=8640000000');
+    
     if (yapi.commons.fileExist(yapi.path.join(yapi.WEBROOT, 'static', ctx.path + '.gz'))) {
       ctx.set('Content-Encoding', 'gzip');
       ctx.path = ctx.path + '.gz';
