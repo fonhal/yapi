@@ -337,6 +337,7 @@ class ProjectMessage extends Component {
                 }
             >
               {getFieldDecorator('sysid', {
+                initialValue: initFormValues.sysid,
                 rules: [
                   {
                     required: true,
