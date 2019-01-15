@@ -235,7 +235,7 @@ class ProjectMessage extends Component {
     let initFormValues = {};
     const {
       name,
-      code,
+      sysid,
       basepath,
       desc,
       project_type,
@@ -247,7 +247,7 @@ class ProjectMessage extends Component {
     } = projectMsg;
     initFormValues = {
       name,
-      code,
+      sysid,
       basepath,
       desc,
       project_type,
@@ -336,7 +336,7 @@ class ProjectMessage extends Component {
                 </span>
                 }
             >
-              {getFieldDecorator('code', {
+              {getFieldDecorator('sysid', {
                 rules: nameLengthLimit('项目代码')
               })(<Input />)}
             </FormItem>

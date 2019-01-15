@@ -122,7 +122,7 @@ class ProjectList extends Component {
                 </Tooltip>
               </span>
               }>
-              {getFieldDecorator('code', {
+              {getFieldDecorator('sysid', {
                 rules: nameLengthLimit('项目代码')
               })(<Input />)}
             </FormItem>

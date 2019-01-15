@@ -42,10 +42,19 @@ class interfaceColController extends baseController {
       for (let i = 0; i < result.length; i++) {
         result[i] = result[i].toObject();
         let caseList = await this.caseModel.list(result[i]._id);
+
+        for(let j=0; j< caseList.length; j++){
+          let item = caseList[j].toObject();
+          let interfaceData = await this.interfaceModel.getBaseinfo(item.interface_id);
+          item.path = interfaceData.path;
+          caseList[j] = item;
+        }
+
         caseList = caseList.sort((a, b) => {
           return a.index - b.index;
         });
         result[i].caseList = caseList;
+        
       }
       ctx.body = yapi.commons.resReturn(result);
     } catch (e) {
