@@ -45,7 +45,9 @@ app.use(async (ctx, next) => {
   //ctx.set('Access-Control-Allow-Origin', '*');
   ctx.set('Access-Control-Allow-Origin', header.origin);
   ctx.set('Access-Control-Allow-Credentials', true);
-  //console.log(ctx)
+  let url = ctx.request.url
+  //if(!url.indexOf('.')) //打印所有接口请求
+  console.log(`http ${ctx.request.method} with url ${url} ${ctx.path} at ${new Date().toLocaleTimeString()}`)
   if (ctx.path.indexOf('/prd') === 0) {
     ctx.set('Cache-Control', 'max-age=8640000000');
     

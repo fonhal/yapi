@@ -13,7 +13,7 @@ const json5 = require('json5');
 const _ = require('underscore');
 const Ajv = require('ajv');
 const Mock = require('mockjs');
-
+const chalk = require('chalk')
 const ejs = require('easy-json-schema');
 
 const jsf = require('json-schema-faker');
@@ -417,6 +417,9 @@ exports.createAction = (router, baseurl, routerController, action, path, method,
     let inst = new routerController(ctx);
     try {
       await inst.init(ctx);
+      let url = ctx.request.url
+      //if(!url.indexOf('.')) //打印所有接口请求
+      console.info(chalk.green(`http ${ctx.request.method} with url ${url} at ${new Date().toLocaleTimeString()}`))
       if (inst.schemaMap && typeof inst.schemaMap === 'object' && inst.schemaMap[action]) {
         ctx.params = Object.assign({}, ctx.request.query, ctx.request.body, ctx.params);
         let validResult = yapi.commons.validateParams(inst.schemaMap[action], ctx.params);
