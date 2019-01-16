@@ -51,7 +51,7 @@ class interfaceCol extends baseModel {
       })
       .exec();
   }
-
+  
   checkRepeat(name) {
     return this.model.countDocuments({
       name: name

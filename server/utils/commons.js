@@ -428,6 +428,7 @@ exports.createAction = (router, baseurl, routerController, action, path, method,
           return (ctx.body = yapi.commons.resReturn(null, 400, validResult.message));
         }
       }
+      console.log('askdkaskdaksdkasdk')
       if (inst.$auth === true) {
         await inst[action].call(inst, ctx);
       } else {

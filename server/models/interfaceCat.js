@@ -34,6 +34,15 @@ class interfaceCat extends baseModel {
       .exec();
   }
 
+  getByProjectId(id){
+    return this.model
+      .findOne({
+        project_id: id,
+        name: '公共分类'
+      })
+      .exec();
+  }
+
   checkRepeat(name) {
     return this.model.countDocuments({
       name: name

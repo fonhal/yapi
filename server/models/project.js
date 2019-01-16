@@ -67,6 +67,14 @@ class projectModel extends baseModel {
       .exec();
   }
 
+  getBySysId(sysid){
+    return this.model
+      .findOne({
+        sysid
+      })
+      .exec();
+  }
+
   getByEnv(id) {
     return this.model
       .findOne({

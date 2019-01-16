@@ -324,6 +324,11 @@ let routerConfig = {
       method: 'post'
     },
     {
+      action: 'upapi',
+      path: 'upapi',
+      method: 'post'
+    },
+    {
       action: 'del',
       path: 'del',
       method: 'post'

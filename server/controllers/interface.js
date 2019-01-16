@@ -206,14 +206,13 @@ class interfaceController extends baseController {
         return (ctx.body = yapi.commons.resReturn(null, 40033, '没有权限'));
       }
     }
-    params.method = params.method || 'GET';
+    params.method = (params.method || 'GET').toUpperCase();
     params.res_body_is_json_schema = _.isUndefined(params.res_body_is_json_schema)
       ? false
       : params.res_body_is_json_schema;
     params.req_body_is_json_schema = _.isUndefined(params.req_body_is_json_schema)
       ? false
       : params.req_body_is_json_schema;
-    params.method = params.method.toUpperCase();
     params.req_params = params.req_params || [];
     params.res_body_type = params.res_body_type ? params.res_body_type.toLowerCase() : 'json';
     let http_path = url.parse(params.path, true);
@@ -336,8 +335,7 @@ class interfaceController extends baseController {
         return (ctx.body = yapi.commons.resReturn(null, 40033, '没有权限'));
       }
     }
-    params.method = params.method || 'GET';
-    params.method = params.method.toUpperCase();
+    params.method = (params.method || 'GET').toUpperCase();
 
     let http_path = url.parse(params.path, true);
 
@@ -580,14 +578,10 @@ class interfaceController extends baseController {
    * @returns {Object}
    * @example ./api/interface/up.json
    */
-
   async up(ctx) {
     let params = ctx.params;
 
-    if (!_.isUndefined(params.method)) {
-      params.method = params.method || 'GET';
-      params.method = params.method.toUpperCase();
-    }
+    params.method = (params.method || 'GET').toUpperCase();
 
     let id = params.id;
     params.message = params.message || '';
@@ -740,6 +734,150 @@ class interfaceController extends baseController {
     yapi.emitHook('interface_update', id).then();
     ctx.body = yapi.commons.resReturn(result);
     return 1;
+  }
+
+  async addWithoutPerm(ctx) {
+    let params = ctx.params;
+
+    params.method = (params.method || 'GET').toUpperCase();
+    params.res_body_is_json_schema = _.isUndefined(params.res_body_is_json_schema)
+      ? false
+      : params.res_body_is_json_schema;
+    params.req_body_is_json_schema = _.isUndefined(params.req_body_is_json_schema)
+      ? false
+      : params.req_body_is_json_schema;
+    params.req_params = params.req_params || [];
+    params.res_body_type = params.res_body_type ? params.res_body_type.toLowerCase() : 'json';
+    let http_path = url.parse(params.path, true);
+
+    if (!yapi.commons.verifyPath(http_path.pathname)) {
+      return (ctx.body = yapi.commons.resReturn(
+        null,
+        400,
+        'path第一位必需为 /, 只允许由 字母数字-/_:.! 组成'
+      ));
+    }
+    console.log('i am add.................111111111111111111')
+    handleHeaders(params)
+
+    params.query_path = {};
+    params.query_path.path = http_path.pathname;
+    params.query_path.params = [];
+    Object.keys(http_path.query).forEach(item => {
+      params.query_path.params.push({
+        name: item,
+        value: http_path.query[item]
+      });
+    });
+    console.log('i am add.................2222222222222222222')
+    let checkRepeat = await this.Model.checkRepeat(params.project_id, params.path, params.method);
+
+    if (checkRepeat > 0) {
+      return (ctx.body = yapi.commons.resReturn(
+        null,
+        40022,
+        '已存在的接口:' + params.path + '[' + params.method + ']'
+      ));
+    }
+
+    let data = Object.assign(params, {
+      uid: this.getUid(),
+      add_time: yapi.commons.time(),
+      up_time: yapi.commons.time()
+    });
+
+    yapi.commons.handleVarPath(params.path, params.req_params);
+
+    if (params.req_params.length > 0) {
+      data.type = 'var';
+      data.req_params = params.req_params;
+    } else {
+      data.type = 'static';
+    }
+
+    // 新建接口的人成为项目dev  如果不存在的话
+    // 命令行导入时无法获知导入接口人的信息，其uid 为 999999
+    let uid = this.getUid();
+
+    if (this.getRole() !== 'admin' && uid !== 999999) {
+      let userdata = await yapi.commons.getUserdata(uid, 'dev');
+      // 检查一下是否有这个人
+      let check = await this.projectModel.checkMemberRepeat(params.project_id, uid);
+      if (check === 0 && userdata) {
+        await this.projectModel.addMember(params.project_id, [userdata]);
+      }
+    }
+
+    let result = await this.Model.save(data);
+    yapi.emitHook('interface_add', result).then();
+    this.catModel.get(params.catid).then(cate => {
+      let username = this.getUsername();
+      let title = `<a href="/user/profile/${this.getUid()}">${username}</a> 为分类 <a href="/project/${
+        params.project_id
+      }/interface/api/cat_${params.catid}">${cate.name}</a> 添加了接口 <a href="/project/${
+        params.project_id
+      }/interface/api/${result._id}">${data.title}</a> `;
+
+      yapi.commons.saveLog({
+        content: title,
+        type: 'project',
+        uid: this.getUid(),
+        username: username,
+        typeid: params.project_id
+      });
+      this.projectModel.up(params.project_id, { up_time: new Date().getTime() }).then();
+    });
+
+    ctx.body = yapi.commons.resReturn(result);
+  }
+
+  /**
+   * 编辑接口
+   * @interface /interface/upapi
+   * @method POST
+   * @category interface
+   * @foldnumber 10
+   * @param {Number}   id 接口id，不能为空
+   * @param {String}   [path] 接口请求路径
+   * @param {String}   [method] 请求方式
+   * @param {Array}  [req_headers] 请求的header信息
+   * @param {String}  [req_headers[].name] 请求的header信息名
+   * @param {String}  [req_headers[].value] 请求的header信息值
+   * @param {Boolean}  [req_headers[].required] 是否是必须，默认为否
+   * @param {String}  [req_headers[].desc] header描述
+   * @param {String}  [req_body_type] 请求参数方式，有["form", "json", "text", "xml"]四种
+   * @param {Mixed}  [req_body_form] 请求参数,如果请求方式是form，参数是Array数组，其他格式请求参数是字符串
+   * @param {String} [req_body_form[].name] 请求参数名
+   * @param {String} [req_body_form[].value] 请求参数值，可填写生成规则（mock）。如@email，随机生成一条email
+   * @param {String} [req_body_form[].type] 请求参数类型，有["text", "file"]两种
+   * @param {String} [req_body_other]  非form类型的请求参数可保存到此字段
+   * @param {String}  [res_body_type] 相应信息的数据格式，有["json", "text", "xml"]三种
+   * @param {String} [res_body] 响应信息，可填写任意字符串，如果res_body_type是json,则会调用mock功能
+   * @param  {String} [desc] 接口描述
+   * @returns {Object}
+   * @example ./api/interface/up.json
+   */
+  async upapi(ctx) {
+    console.log('i am in up api.....')
+    let params = ctx.params;
+    params.method = (params.method || 'GET').toUpperCase()
+
+    
+    params.message = (params.message || '').replace(/\n/g, '<br>');
+
+    let project = await this.projectModel.getBySysId(params.sysid)
+    if(!project){
+      return (ctx.body = yapi.commons.resReturn(null, 400, '不存在的系统，请创建系统后再上报接口!'));
+    }
+    params.project_id = project.id
+    let interfaceCat = await this.catModel.getByProjectId(project.id)
+    if(!interfaceCat){
+      return (ctx.body = yapi.commons.resReturn(null, 400, '系统下未创建分类，请创建默认公共分类后再上报接口！'));
+    }
+    params.cat_id = interfaceCat.id
+    this.addWithoutPerm(ctx)
+    console.log('i am add succes....')
+    this.up(ctx)
   }
 
   diffHTML(html) {
