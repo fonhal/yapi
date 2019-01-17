@@ -20,9 +20,9 @@ const path = require('path');
 // const htmlCss = require("jsondiffpatch/public/formatters-styles/html.css");
 
 
-function handleHeaders(values){
+function handleHeaders(values) {
   let isfile = false,
-  isHavaContentType = false;
+    isHavaContentType = false;
   if (values.req_body_type === 'form') {
     values.req_body_form && values.req_body_form.forEach(item => {
       if (item.type === 'file') {
@@ -43,14 +43,13 @@ function handleHeaders(values){
       });
     }
   } else if (values.req_body_type === 'json') {
-    values.req_headers
-      ? values.req_headers.map(item => {
-          if (item.name === 'Content-Type') {
-            item.value = 'application/json';
-            isHavaContentType = true;
-          }
-        })
-      : [];
+    values.req_headers ?
+      values.req_headers.map(item => {
+        if (item.name === 'Content-Type') {
+          item.value = 'application/json';
+          isHavaContentType = true;
+        }
+      }) : [];
     if (isHavaContentType === false) {
       values.req_headers = values.req_headers || [];
       values.req_headers.unshift({
@@ -81,43 +80,35 @@ class interfaceController extends baseController {
     const addAndUpCommonField = {
       desc: 'string',
       status: 'string',
-      req_query: [
-        {
-          name: 'string',
-          value: 'string',
-          example: 'string',
-          desc: 'string',
-          required: 'string'
-        }
-      ],
-      req_headers: [
-        {
-          name: 'string',
-          value: 'string',
-          example: 'string',
-          desc: 'string',
-          required: 'string'
-        }
-      ],
+      req_query: [{
+        name: 'string',
+        value: 'string',
+        example: 'string',
+        desc: 'string',
+        required: 'string'
+      }],
+      req_headers: [{
+        name: 'string',
+        value: 'string',
+        example: 'string',
+        desc: 'string',
+        required: 'string'
+      }],
       req_body_type: 'string',
-      req_params: [
-        {
-          name: 'string',
-          example: 'string',
-          desc: 'string'
-        }
-      ],
-      req_body_form: [
-        {
-          name: 'string',
-          type: {
-            type: 'string'
-          },
-          example: 'string',
-          desc: 'string',
-          required: 'string'
-        }
-      ],
+      req_params: [{
+        name: 'string',
+        example: 'string',
+        desc: 'string'
+      }],
+      req_body_form: [{
+        name: 'string',
+        type: {
+          type: 'string'
+        },
+        example: 'string',
+        desc: 'string',
+        required: 'string'
+      }],
       req_body_other: 'string',
       res_body_type: 'string',
       res_body: 'string',
@@ -129,8 +120,7 @@ class interfaceController extends baseController {
     };
 
     this.schemaMap = {
-      add: Object.assign(
-        {
+      add: Object.assign({
           '*project_id': 'number',
           '*path': minLengthStringField,
           '*title': minLengthStringField,
@@ -139,8 +129,7 @@ class interfaceController extends baseController {
         },
         addAndUpCommonField
       ),
-      up: Object.assign(
-        {
+      up: Object.assign({
           '*id': 'number',
           project_id: 'number',
           path: minLengthStringField,
@@ -153,8 +142,7 @@ class interfaceController extends baseController {
         },
         addAndUpCommonField
       ),
-      save: Object.assign(
-        {
+      save: Object.assign({
           project_id: 'number',
           catid: 'number',
           title: minLengthStringField,
@@ -207,12 +195,12 @@ class interfaceController extends baseController {
       }
     }
     params.method = (params.method || 'GET').toUpperCase();
-    params.res_body_is_json_schema = _.isUndefined(params.res_body_is_json_schema)
-      ? false
-      : params.res_body_is_json_schema;
-    params.req_body_is_json_schema = _.isUndefined(params.req_body_is_json_schema)
-      ? false
-      : params.req_body_is_json_schema;
+    params.res_body_is_json_schema = _.isUndefined(params.res_body_is_json_schema) ?
+      false :
+      params.res_body_is_json_schema;
+    params.req_body_is_json_schema = _.isUndefined(params.req_body_is_json_schema) ?
+      false :
+      params.req_body_is_json_schema;
     params.req_params = params.req_params || [];
     params.res_body_type = params.res_body_type ? params.res_body_type.toLowerCase() : 'json';
     let http_path = url.parse(params.path, true);
@@ -292,7 +280,9 @@ class interfaceController extends baseController {
         username: username,
         typeid: params.project_id
       });
-      this.projectModel.up(params.project_id, { up_time: new Date().getTime() }).then();
+      this.projectModel.up(params.project_id, {
+        up_time: new Date().getTime()
+      }).then();
     });
 
     ctx.body = yapi.commons.resReturn(result);
@@ -328,7 +318,7 @@ class interfaceController extends baseController {
 
   async save(ctx) {
     let params = ctx.params;
-    
+
     if (!this.$tokenAuth) {
       let auth = await this.checkAuth(params.project_id, 'project', 'edit');
       if (!auth) {
@@ -359,12 +349,12 @@ class interfaceController extends baseController {
           let data = {};
           data.params = validParams;
 
-          if(params.res_body_is_json_schema && params.dataSync === 'good'){
-            try{
+          if (params.res_body_is_json_schema && params.dataSync === 'good') {
+            try {
               let new_res_body = yapi.commons.json_parse(params.res_body)
               let old_res_body = yapi.commons.json_parse(item.res_body)
-              data.params.res_body = JSON.stringify(mergeJsonSchema(old_res_body, new_res_body),null,2);
-            }catch(err){}
+              data.params.res_body = JSON.stringify(mergeJsonSchema(old_res_body, new_res_body), null, 2);
+            } catch (err) {}
           }
           await this.up(data);
         } else {
@@ -462,7 +452,9 @@ class interfaceController extends baseController {
         result = await this.Model.listWithPage(project_id, page, limit);
       }
 
-      let count = await this.Model.listCount({ project_id });
+      let count = await this.Model.listCount({
+        project_id
+      });
 
       ctx.body = yapi.commons.resReturn({
         count: count,
@@ -505,7 +497,9 @@ class interfaceController extends baseController {
 
       let result = await this.Model.listByCatidWithPage(catid, page, limit);
 
-      let count = await this.Model.listCount({ catid });
+      let count = await this.Model.listCount({
+        catid
+      });
 
       ctx.body = yapi.commons.resReturn({
         count: count,
@@ -602,13 +596,12 @@ class interfaceController extends baseController {
       }
     }
 
-    let data = Object.assign(
-      {
+    let data = Object.assign({
         up_time: yapi.commons.time()
       },
       params
     );
-    
+
     if (params.path) {
       let http_path;
       http_path = url.parse(params.path, true);
@@ -671,7 +664,7 @@ class interfaceController extends baseController {
     this.catModel.get(interfaceData.catid).then(cate => {
       let diffView2 = showDiffMsg(jsondiffpatch, formattersHtml, logData);
       if (diffView2.length <= 0) {
-          return; // 没有变化时，不写日志
+        return; // 没有变化时，不写日志
       }
       yapi.commons.saveLog({
         content: `<a href="/user/profile/${this.getUid()}">${username}</a> 
@@ -689,7 +682,9 @@ class interfaceController extends baseController {
       });
     });
 
-    this.projectModel.up(interfaceData.project_id, { up_time: new Date().getTime() }).then();
+    this.projectModel.up(interfaceData.project_id, {
+      up_time: new Date().getTime()
+    }).then();
     if (params.switch_notice === true) {
       let diffView = showDiffMsg(jsondiffpatch, formattersHtml, logData);
       let annotatedCss = fs.readFileSync(
@@ -705,7 +700,7 @@ class interfaceController extends baseController {
       );
 
       let project = await this.projectModel.getBaseInfo(interfaceData.project_id);
-    
+
       let interfaceUrl = `${ctx.request.origin}/project/${
         interfaceData.project_id
       }/interface/api/${id}`;
@@ -740,14 +735,12 @@ class interfaceController extends baseController {
     let params = ctx.params;
 
     params.method = (params.method || 'GET').toUpperCase();
-    params.res_body_is_json_schema = _.isUndefined(params.res_body_is_json_schema)
-      ? false
-      : params.res_body_is_json_schema;
-    params.req_body_is_json_schema = _.isUndefined(params.req_body_is_json_schema)
-      ? false
-      : params.req_body_is_json_schema;
+    params.message = (params.message || '').replace(/\n/g, '<br>');
+    params.res_body_is_json_schema = _.isUndefined(params.res_body_is_json_schema) ? false : params.res_body_is_json_schema;
+    params.req_body_is_json_schema = _.isUndefined(params.req_body_is_json_schema) ? false : params.req_body_is_json_schema;
     params.req_params = params.req_params || [];
     params.res_body_type = params.res_body_type ? params.res_body_type.toLowerCase() : 'json';
+    handleHeaders(params)
     let http_path = url.parse(params.path, true);
 
     if (!yapi.commons.verifyPath(http_path.pathname)) {
@@ -757,31 +750,22 @@ class interfaceController extends baseController {
         'path第一位必需为 /, 只允许由 字母数字-/_:.! 组成'
       ));
     }
-    console.log('i am add.................111111111111111111')
-    handleHeaders(params)
 
     params.query_path = {};
     params.query_path.path = http_path.pathname;
     params.query_path.params = [];
+
     Object.keys(http_path.query).forEach(item => {
       params.query_path.params.push({
         name: item,
         value: http_path.query[item]
       });
     });
-    console.log('i am add.................2222222222222222222')
-    let checkRepeat = await this.Model.checkRepeat(params.project_id, params.path, params.method);
-
-    if (checkRepeat > 0) {
-      return (ctx.body = yapi.commons.resReturn(
-        null,
-        40022,
-        '已存在的接口:' + params.path + '[' + params.method + ']'
-      ));
-    }
-
+    // 新建接口的人成为项目dev  如果不存在的话
+    // 命令行导入时无法获知导入接口人的信息，其uid 为 999999
+    let uid = 999999;
     let data = Object.assign(params, {
-      uid: this.getUid(),
+      uid: uid,
       add_time: yapi.commons.time(),
       up_time: yapi.commons.time()
     });
@@ -795,38 +779,43 @@ class interfaceController extends baseController {
       data.type = 'static';
     }
 
-    // 新建接口的人成为项目dev  如果不存在的话
-    // 命令行导入时无法获知导入接口人的信息，其uid 为 999999
-    let uid = this.getUid();
 
-    if (this.getRole() !== 'admin' && uid !== 999999) {
-      let userdata = await yapi.commons.getUserdata(uid, 'dev');
-      // 检查一下是否有这个人
-      let check = await this.projectModel.checkMemberRepeat(params.project_id, uid);
-      if (check === 0 && userdata) {
-        await this.projectModel.addMember(params.project_id, [userdata]);
-      }
+    let interfaceData = await this.Model.getByCondition({
+      project_id: params.project_id,
+      path: params.path,
+      method: params.method
+    });
+    let result = {}
+    if (interfaceData) {
+      //TODO 检查是否需要更新入口参数和返回参数
+      
+
+    } else {
+      result = await this.Model.save(data);
+      yapi.emitHook('interface_add', result).then();
     }
 
-    let result = await this.Model.save(data);
-    yapi.emitHook('interface_add', result).then();
     this.catModel.get(params.catid).then(cate => {
-      let username = this.getUsername();
-      let title = `<a href="/user/profile/${this.getUid()}">${username}</a> 为分类 <a href="/project/${
+      let username = 'dev';
+      let title = `<a href="/user/profile/${uid}">${username}</a> 为分类 <a href="/project/${
         params.project_id
-      }/interface/api/cat_${params.catid}">${cate.name}</a> 添加了接口 <a href="/project/${
+      }/interface/api/cat_${params.catid}">${cate.name}</a> ${interfaceData?'更新':'添加'}了接口 <a href="/project/${
         params.project_id
       }/interface/api/${result._id}">${data.title}</a> `;
 
       yapi.commons.saveLog({
         content: title,
         type: 'project',
-        uid: this.getUid(),
+        uid: uid,
         username: username,
         typeid: params.project_id
       });
-      this.projectModel.up(params.project_id, { up_time: new Date().getTime() }).then();
+      this.projectModel.up(params.project_id, {
+        up_time: new Date().getTime()
+      }).then();
     });
+
+    console.log(result)
 
     ctx.body = yapi.commons.resReturn(result);
   }
@@ -858,26 +847,19 @@ class interfaceController extends baseController {
    * @example ./api/interface/up.json
    */
   async upapi(ctx) {
-    console.log('i am in up api.....')
-    let params = ctx.params;
-    params.method = (params.method || 'GET').toUpperCase()
 
-    
-    params.message = (params.message || '').replace(/\n/g, '<br>');
-
+    let params = Object.assign(ctx.params, JSON.parse(ctx.request.body || '{}'));
     let project = await this.projectModel.getBySysId(params.sysid)
-    if(!project){
+    if (!project) {
       return (ctx.body = yapi.commons.resReturn(null, 400, '不存在的系统，请创建系统后再上报接口!'));
     }
     params.project_id = project.id
     let interfaceCat = await this.catModel.getByProjectId(project.id)
-    if(!interfaceCat){
+    if (!interfaceCat) {
       return (ctx.body = yapi.commons.resReturn(null, 400, '系统下未创建分类，请创建默认公共分类后再上报接口！'));
     }
-    params.cat_id = interfaceCat.id
+    params.catid = interfaceCat.id
     this.addWithoutPerm(ctx)
-    console.log('i am add succes....')
-    this.up(ctx)
   }
 
   diffHTML(html) {
@@ -937,7 +919,9 @@ class interfaceController extends baseController {
           typeid: cate.project_id
         });
       });
-      this.projectModel.up(data.project_id, { up_time: new Date().getTime() }).then();
+      this.projectModel.up(data.project_id, {
+        up_time: new Date().getTime()
+      }).then();
       ctx.body = yapi.commons.resReturn(result);
     } catch (err) {
       ctx.body = yapi.commons.resReturn(null, 402, err.message);
@@ -961,7 +945,10 @@ class interfaceController extends baseController {
         userinfo = await userInst.findById(result.edit_uid);
         data = {
           errno: result.edit_uid,
-          data: { uid: result.edit_uid, username: userinfo.username }
+          data: {
+            uid: result.edit_uid,
+            username: userinfo.username
+          }
         };
       } else {
         this.Model.upEditUid(id, this.getUid()).then();

@@ -70,7 +70,7 @@ class projectModel extends baseModel {
   getBySysId(sysid){
     return this.model
       .findOne({
-        sysid
+        sysid: sysid
       })
       .exec();
   }

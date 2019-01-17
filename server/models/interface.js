@@ -154,6 +154,11 @@ class interfaceModel extends baseModel {
       .select(select)
       .exec();
   }
+  getByCondition(params) {
+    return this.model
+      .findOne(params)
+      .exec();
+  }
 
   checkRepeat(id, path, method) {
     return this.model.countDocuments({

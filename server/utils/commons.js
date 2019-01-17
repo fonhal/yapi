@@ -419,7 +419,7 @@ exports.createAction = (router, baseurl, routerController, action, path, method,
       await inst.init(ctx);
       let url = ctx.request.url
       //if(!url.indexOf('.')) //打印所有接口请求
-      console.info(chalk.green(`http ${ctx.request.method} with url ${url} at ${new Date().toLocaleTimeString()}`))
+      console.info(chalk.green(`http ${ctx.request.method} for url ${url} at ${new Date().toLocaleTimeString()}`)) //with params ${JSON.stringify(ctx.request.params || ctx.request.body || {})}
       if (inst.schemaMap && typeof inst.schemaMap === 'object' && inst.schemaMap[action]) {
         ctx.params = Object.assign({}, ctx.request.query, ctx.request.body, ctx.params);
         let validResult = yapi.commons.validateParams(inst.schemaMap[action], ctx.params);
@@ -428,7 +428,6 @@ exports.createAction = (router, baseurl, routerController, action, path, method,
           return (ctx.body = yapi.commons.resReturn(null, 400, validResult.message));
         }
       }
-      console.log('askdkaskdaksdkasdk')
       if (inst.$auth === true) {
         await inst[action].call(inst, ctx);
       } else {
