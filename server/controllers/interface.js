@@ -764,11 +764,12 @@ class interfaceController extends baseController {
     // 新建接口的人成为项目dev  如果不存在的话
     // 命令行导入时无法获知导入接口人的信息，其uid 为 999999
     let uid = 999999;
-    let data = Object.assign(params, {
+    let commonParams = {
       uid: uid,
       add_time: yapi.commons.time(),
       up_time: yapi.commons.time()
-    });
+    };
+    let data = Object.assign(params, commonParams);
 
     yapi.commons.handleVarPath(params.path, params.req_params);
 
@@ -779,7 +780,6 @@ class interfaceController extends baseController {
       data.type = 'static';
     }
 
-
     let interfaceData = await this.Model.getByCondition({
       project_id: params.project_id,
       path: params.path,
@@ -788,8 +788,52 @@ class interfaceController extends baseController {
     let result = {}
     if (interfaceData) {
       //TODO 检查是否需要更新入口参数和返回参数
-      
-
+      /* console.log(JSON.stringify(interfaceData))
+      console.log()
+      console.log(JSON.stringify(data)); */
+      interfaceData = Object.assign(interfaceData, commonParams);
+      ['desc', 'markdown', 'method', 'req_body_type', 'res_body_is_json_schema', 'res_body_type', ''].forEach(key => {
+        interfaceData[key] = data[key] || interfaceData[key] // 
+      });
+      ['req_headers', 'req_query', 'req_params', 'req_body_form'].forEach(key => {
+        let keyInterfaceData = interfaceData[key],
+          keyData = data[key]
+        if (keyData && keyData.length) {
+          if (keyInterfaceData && keyInterfaceData.length) {
+            keyData.forEach(item => {
+              let keyV = keyInterfaceData.find(function(value, index, arr) {
+                return value.name === item.name
+              })
+              if (keyV) {
+                if (keyV.value !== item.value) {
+                  keyV.value = item.value
+                }
+              } else {
+                keyInterfaceData.push(item)
+              }
+            })
+          } else {
+            keyInterfaceData = keyData || []
+          }
+        }
+        interfaceData[key] = interfaceData
+      });
+      ['res_body'].forEach(key => {
+        let keyInterfaceObj = interfaceData[key],
+          keyDataObj = data[key]
+        if (!keyInterfaceObj) {
+          keyInterfaceObj = keyDataObj || ''
+        } else if (!keyDataObj) {
+          //continue
+        } else if (keyInterfaceObj !== keyDataObj) {
+          keyInterfaceObj = JSON.stringify(Object.assign({}, JSON.parse(keyInterfaceObj), JSON.parse(keyDataObj)))
+        }
+        console.log(keyInterfaceObj, ';;y;')
+        interfaceData[key] = keyInterfaceObj
+      });
+      console.log(interfaceData)
+      result = await this.Model.up(interfaceData._id, interfaceData)
+      yapi.emitHook('interface_update', interfaceData._id).then();
     } else {
       result = await this.Model.save(data);
       yapi.emitHook('interface_add', result).then();
