@@ -10,7 +10,9 @@ const Mock = require('mockjs');
 const mockExtra = require(path.resolve(yapi.WEBROOT, 'common/mock-extra.js'));
 
 function arrToObj(arr) {
-  let obj = { 'Set-Cookie': [] };
+  let obj = {
+    'Set-Cookie': []
+  };
   arr.forEach(item => {
     if (item.name === 'Set-Cookie') {
       obj['Set-Cookie'].push(item.value);
@@ -19,8 +21,8 @@ function arrToObj(arr) {
   return obj;
 }
 
-module.exports = function() {
-  yapi.connect.then(function() {
+module.exports = function () {
+  yapi.connect.then(function () {
     let Col = mongoose.connection.db.collection('adv_mock');
     Col.createIndex({
       interface_id: 1
@@ -63,7 +65,6 @@ module.exports = function() {
         matchList.push(item);
       }
     });
-
     // 其他数据
     if (matchList.length === 0) {
       let list = await caseInst.model
@@ -81,12 +82,18 @@ module.exports = function() {
     }
 
     if (matchList.length > 0) {
-      let maxItem = _.max(matchList, item => (item.params && Object.keys(item.params).length) || 0);
-      return maxItem;
+
+      /* let maxItem = _.max(matchList, item => (item.params && Object.keys(item.params).length) || 0);
+      return maxItem; */
+      //修改为返回随机匹配项
+      return matchList[random(0, matchList.length)]
     }
     return null;
   }
 
+  function random(lower, upper) {
+    return Math.floor(Math.random() * (upper - lower)) + lower;
+  }
   async function handleByCase(caseData) {
     let caseInst = yapi.getInst(caseModel);
     let result = await caseInst.get({
@@ -95,7 +102,7 @@ module.exports = function() {
     return result;
   }
 
-  this.bindHook('add_router', function(addRouter) {
+  this.bindHook('add_router', function (addRouter) {
     addRouter({
       controller: controller,
       method: 'get',
@@ -155,11 +162,11 @@ module.exports = function() {
       action: 'hideCase'
     });
   });
-  this.bindHook('interface_del', async function(id) {
+  this.bindHook('interface_del', async function (id) {
     let inst = yapi.getInst(advModel);
     await inst.delByInterfaceId(id);
   });
-  this.bindHook('project_del', async function(id) {
+  this.bindHook('project_del', async function (id) {
     let inst = yapi.getInst(advModel);
     await inst.delByProjectId(id);
   });
@@ -171,7 +178,7 @@ module.exports = function() {
       mockJson: res 
     } 
    */
-  this.bindHook('mock_after', async function(context) {
+  this.bindHook('mock_after', async function (context) {
     let interfaceId = context.interfaceData._id;
     let caseData = await checkCase(context.ctx, interfaceId);
 

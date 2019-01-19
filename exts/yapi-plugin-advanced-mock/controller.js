@@ -130,7 +130,8 @@ class advMockController extends baseController {
     findRepeatParams = {
       project_id: data.project_id,
       interface_id: data.interface_id,
-      ip_enable: data.ip_enable
+      ip_enable: data.ip_enable,
+      res_body: data.res_body
     };
 
     if (data.params && typeof data.params === 'object' && Object.keys(data.params).length > 0) {
