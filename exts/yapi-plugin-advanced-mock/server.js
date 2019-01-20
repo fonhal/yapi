@@ -171,8 +171,6 @@ module.exports = function() {
   })
 
   this.bindHook('advmock_add', async function(params) {
-    console.log('asdasdlalsdlasld',params)
-
     let data = {
       interface_id: params.interface_id,
       project_id: params.project_id,
@@ -184,8 +182,8 @@ module.exports = function() {
       delay: params.delay || 0,
       headers: params.headers || [],
       up_time: yapi.commons.time(),
-      res_body: params.res_body,
-      ip: params.ip 
+      res_body: JSON.stringify(params.res_body_data || {}),
+      ip: params.ip
     }
 
     data.code = isNaN(data.code) ? 200 : +data.code
@@ -195,7 +193,7 @@ module.exports = function() {
     findRepeatParams = {
       project_id: data.project_id,
       interface_id: data.interface_id,
-      ip_enable: data.ip_enable,
+      ip_enable: data.ip_enable
       /* res_body: data.res_body */
     }
 
@@ -205,20 +203,21 @@ module.exports = function() {
       }
     }
 
-    if(data.res_body && data.res_body.code){
-      findRepeatParams['res_body.code'] = data.res_body.code
-    }
+    /*   if (params.res_body_data && params.res_body_data.code) {
+        findRepeatParams['res_body.code'] = params.res_body_data.code
+      } */
 
     if (data.ip_enable) {
       findRepeatParams.ip = data.ip
     }
+
     let caseInst = yapi.getInst(caseModel)
     findRepeat = await caseInst.get(findRepeatParams)
-
-    if (findRepeat && findRepeat._id !== params.id) {
-      console.log('期望已经存在。。。。')
+    if (findRepeat && findRepeat.res_body === JSON.stringify(params.res_body_data)) {
+      console.log('期望已经存在，不添加新的期望。。。。')
+      return
     }
-
+    data.name = params.res_body_data.code
     let result
     if (params.id && !isNaN(params.id)) {
       data.id = +params.id
@@ -226,7 +225,6 @@ module.exports = function() {
     } else {
       result = await caseInst.save(data)
     }
-    console.log('期望添加成功。。。。。。。。。。。。。')
   })
   /**
    * let context = {
