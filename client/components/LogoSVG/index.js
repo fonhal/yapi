@@ -1,6 +1,6 @@
 import React from 'react';
 
-const LogoSVG = props => {
+const LogoSVG = () => {
   return (
     <img src="/image/logo.png" />
   );
