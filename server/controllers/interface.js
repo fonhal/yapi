@@ -780,6 +780,7 @@ class interfaceController extends baseController {
       data.type = 'static';
     }
 
+
     let interfaceData = await this.Model.getByCondition({
       project_id: params.project_id,
       path: params.path,
@@ -788,20 +789,17 @@ class interfaceController extends baseController {
     let result = {}
     if (interfaceData) {
       //TODO 检查是否需要更新入口参数和返回参数
-      /* console.log(JSON.stringify(interfaceData))
-      console.log()
-      console.log(JSON.stringify(data)); */
       interfaceData = Object.assign(interfaceData, commonParams);
       ['desc', 'markdown', 'method', 'req_body_type', 'res_body_is_json_schema', 'res_body_type', ''].forEach(key => {
         interfaceData[key] = data[key] || interfaceData[key] // 
       });
-      ['req_headers', 'req_query', 'req_params', 'req_body_form'].forEach(key => {
+      ['req_headers', 'req_query', 'req_params'].forEach(key => { //, 'req_body_form'
         let keyInterfaceData = interfaceData[key],
           keyData = data[key]
         if (keyData && keyData.length) {
           if (keyInterfaceData && keyInterfaceData.length) {
             keyData.forEach(item => {
-              let keyV = keyInterfaceData.find(function(value, index, arr) {
+              let keyV = keyInterfaceData.find(function (value, index, arr) {
                 return value.name === item.name
               })
               if (keyV) {
@@ -828,16 +826,21 @@ class interfaceController extends baseController {
         } else if (keyInterfaceObj !== keyDataObj) {
           keyInterfaceObj = JSON.stringify(Object.assign({}, JSON.parse(keyInterfaceObj), JSON.parse(keyDataObj)))
         }
-        console.log(keyInterfaceObj, ';;y;')
         interfaceData[key] = keyInterfaceObj
       });
-      console.log(interfaceData)
       result = await this.Model.up(interfaceData._id, interfaceData)
       yapi.emitHook('interface_update', interfaceData._id).then();
     } else {
       result = await this.Model.save(data);
+      interfaceData = await this.Model.getByCondition({
+        project_id: params.project_id,
+        path: params.path,
+        method: params.method
+      })
       yapi.emitHook('interface_add', result).then();
     }
+    interfaceData.interface_id = interfaceData._id
+    yapi.emitHook('advmock_add', interfaceData)
 
     this.catModel.get(params.catid).then(cate => {
       let username = 'dev';
@@ -858,8 +861,6 @@ class interfaceController extends baseController {
         up_time: new Date().getTime()
       }).then();
     });
-
-    console.log(result)
 
     ctx.body = yapi.commons.resReturn(result);
   }

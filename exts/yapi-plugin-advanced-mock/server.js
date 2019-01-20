@@ -1,53 +1,53 @@
-const controller = require('./controller');
-const advModel = require('./advMockModel.js');
-const caseModel = require('./caseModel.js');
-const yapi = require('yapi.js');
-const mongoose = require('mongoose');
-const _ = require('underscore');
-const path = require('path');
-const lib = require(path.resolve(yapi.WEBROOT, 'common/lib.js'));
-const Mock = require('mockjs');
-const mockExtra = require(path.resolve(yapi.WEBROOT, 'common/mock-extra.js'));
+const controller = require('./controller')
+const advModel = require('./advMockModel.js')
+const caseModel = require('./caseModel.js')
+const yapi = require('yapi.js')
+const mongoose = require('mongoose')
+const _ = require('underscore')
+const path = require('path')
+const lib = require(path.resolve(yapi.WEBROOT, 'common/lib.js'))
+const Mock = require('mockjs')
+const mockExtra = require(path.resolve(yapi.WEBROOT, 'common/mock-extra.js'))
 
 function arrToObj(arr) {
   let obj = {
     'Set-Cookie': []
-  };
+  }
   arr.forEach(item => {
     if (item.name === 'Set-Cookie') {
-      obj['Set-Cookie'].push(item.value);
-    } else obj[item.name] = item.value;
-  });
-  return obj;
+      obj['Set-Cookie'].push(item.value)
+    } else obj[item.name] = item.value
+  })
+  return obj
 }
 
-module.exports = function () {
-  yapi.connect.then(function () {
-    let Col = mongoose.connection.db.collection('adv_mock');
+module.exports = function() {
+  yapi.connect.then(function() {
+    let Col = mongoose.connection.db.collection('adv_mock')
     Col.createIndex({
       interface_id: 1
-    });
+    })
     Col.createIndex({
       project_id: 1
-    });
+    })
 
-    let caseCol = mongoose.connection.db.collection('adv_mock_case');
+    let caseCol = mongoose.connection.db.collection('adv_mock_case')
     caseCol.createIndex({
       interface_id: 1
-    });
+    })
     caseCol.createIndex({
       project_id: 1
-    });
-  });
+    })
+  })
 
   async function checkCase(ctx, interfaceId) {
-    let reqParams = Object.assign({}, ctx.query, ctx.request.body);
-    let caseInst = yapi.getInst(caseModel);
+    let reqParams = Object.assign({}, ctx.query, ctx.request.body)
+    let caseInst = yapi.getInst(caseModel)
 
     // let ip = ctx.ip.match(/\d+.\d+.\d+.\d+/)[0];
     // request.ip
 
-    let ip = yapi.commons.getIp(ctx);
+    let ip = yapi.commons.getIp(ctx)
     //   数据库信息查询
     // 过滤 开启IP
     let listWithIp = await caseInst.model
@@ -56,15 +56,15 @@ module.exports = function () {
         ip_enable: true,
         ip: ip
       })
-      .select('_id params case_enable');
+      .select('_id params case_enable')
 
-    let matchList = [];
+    let matchList = []
     listWithIp.forEach(item => {
-      let params = item.params;
+      let params = item.params
       if (item.case_enable && lib.isDeepMatch(reqParams, params)) {
-        matchList.push(item);
+        matchList.push(item)
       }
-    });
+    })
     // 其他数据
     if (matchList.length === 0) {
       let list = await caseInst.model
@@ -72,49 +72,48 @@ module.exports = function () {
           interface_id: interfaceId,
           ip_enable: false
         })
-        .select('_id params case_enable');
+        .select('_id params case_enable')
       list.forEach(item => {
-        let params = item.params;
+        let params = item.params
         if (item.case_enable && lib.isDeepMatch(reqParams, params)) {
-          matchList.push(item);
+          matchList.push(item)
         }
-      });
+      })
     }
 
     if (matchList.length > 0) {
-
       /* let maxItem = _.max(matchList, item => (item.params && Object.keys(item.params).length) || 0);
       return maxItem; */
       //修改为返回随机匹配项
       return matchList[random(0, matchList.length)]
     }
-    return null;
+    return null
   }
 
   function random(lower, upper) {
-    return Math.floor(Math.random() * (upper - lower)) + lower;
+    return Math.floor(Math.random() * (upper - lower)) + lower
   }
   async function handleByCase(caseData) {
-    let caseInst = yapi.getInst(caseModel);
+    let caseInst = yapi.getInst(caseModel)
     let result = await caseInst.get({
       _id: caseData._id
-    });
-    return result;
+    })
+    return result
   }
 
-  this.bindHook('add_router', function (addRouter) {
+  this.bindHook('add_router', function(addRouter) {
     addRouter({
       controller: controller,
       method: 'get',
       path: 'advmock/get',
       action: 'getMock'
-    });
+    })
     addRouter({
       controller: controller,
       method: 'post',
       path: 'advmock/save',
       action: 'upMock'
-    });
+    })
     addRouter({
       /**
        * 保存期望
@@ -123,14 +122,14 @@ module.exports = function () {
       method: 'post',
       path: 'advmock/case/save',
       action: 'saveCase'
-    });
+    })
 
     addRouter({
       controller: controller,
       method: 'get',
       path: 'advmock/case/get',
       action: 'getCase'
-    });
+    })
 
     addRouter({
       /**
@@ -140,7 +139,7 @@ module.exports = function () {
       method: 'get',
       path: 'advmock/case/list',
       action: 'list'
-    });
+    })
 
     addRouter({
       /**
@@ -150,7 +149,7 @@ module.exports = function () {
       method: 'post',
       path: 'advmock/case/del',
       action: 'delCase'
-    });
+    })
 
     addRouter({
       /**
@@ -160,16 +159,75 @@ module.exports = function () {
       method: 'post',
       path: 'advmock/case/hide',
       action: 'hideCase'
-    });
-  });
-  this.bindHook('interface_del', async function (id) {
-    let inst = yapi.getInst(advModel);
-    await inst.delByInterfaceId(id);
-  });
-  this.bindHook('project_del', async function (id) {
-    let inst = yapi.getInst(advModel);
-    await inst.delByProjectId(id);
-  });
+    })
+  })
+  this.bindHook('interface_del', async function(id) {
+    let inst = yapi.getInst(advModel)
+    await inst.delByInterfaceId(id)
+  })
+  this.bindHook('project_del', async function(id) {
+    let inst = yapi.getInst(advModel)
+    await inst.delByProjectId(id)
+  })
+
+  this.bindHook('advmock_add', async function(params) {
+    console.log('asdasdlalsdlasld',params)
+
+    let data = {
+      interface_id: params.interface_id,
+      project_id: params.project_id,
+      ip_enable: params.ip_enable || false,
+      name: params.name,
+      params: params.params || [],
+      uid: params.uid,
+      code: params.code || 200,
+      delay: params.delay || 0,
+      headers: params.headers || [],
+      up_time: yapi.commons.time(),
+      res_body: params.res_body,
+      ip: params.ip 
+    }
+
+    data.code = isNaN(data.code) ? 200 : +data.code
+    data.delay = isNaN(data.delay) ? 0 : +data.delay
+
+    let findRepeat, findRepeatParams
+    findRepeatParams = {
+      project_id: data.project_id,
+      interface_id: data.interface_id,
+      ip_enable: data.ip_enable,
+      /* res_body: data.res_body */
+    }
+
+    if (data.params && typeof data.params === 'object' && Object.keys(data.params).length > 0) {
+      for (let i in data.params) {
+        findRepeatParams['params.' + i] = data.params[i]
+      }
+    }
+
+    if(data.res_body && data.res_body.code){
+      findRepeatParams['res_body.code'] = data.res_body.code
+    }
+
+    if (data.ip_enable) {
+      findRepeatParams.ip = data.ip
+    }
+    let caseInst = yapi.getInst(caseModel)
+    findRepeat = await caseInst.get(findRepeatParams)
+
+    if (findRepeat && findRepeat._id !== params.id) {
+      console.log('期望已经存在。。。。')
+    }
+
+    let result
+    if (params.id && !isNaN(params.id)) {
+      data.id = +params.id
+      result = await caseInst.up(data)
+    } else {
+      result = await caseInst.save(data)
+    }
+    console.log('期望添加成功。。。。。。。。。。。。。')
+  })
   /**
    * let context = {
       projectData: project,
@@ -178,16 +236,16 @@ module.exports = function () {
       mockJson: res 
     } 
    */
-  this.bindHook('mock_after', async function (context) {
-    let interfaceId = context.interfaceData._id;
-    let caseData = await checkCase(context.ctx, interfaceId);
+  this.bindHook('mock_after', async function(context) {
+    let interfaceId = context.interfaceData._id
+    let caseData = await checkCase(context.ctx, interfaceId)
 
     // 只有开启高级mock才可用
     if (caseData && caseData.case_enable) {
       // 匹配到高级mock
-      let data = await handleByCase(caseData);
+      let data = await handleByCase(caseData)
 
-      context.mockJson = yapi.commons.json_parse(data.res_body);
+      context.mockJson = yapi.commons.json_parse(data.res_body)
       try {
         context.mockJson = Mock.mock(
           mockExtra(context.mockJson, {
@@ -195,25 +253,25 @@ module.exports = function () {
             body: context.ctx.request.body,
             params: Object.assign({}, context.ctx.query, context.ctx.request.body)
           })
-        );
+        )
       } catch (err) {
-        yapi.commons.log(err, 'error');
+        yapi.commons.log(err, 'error')
       }
 
-      context.resHeader = arrToObj(data.headers);
-      context.httpCode = data.code;
-      context.delay = data.delay;
-      return true;
+      context.resHeader = arrToObj(data.headers)
+      context.httpCode = data.code
+      context.delay = data.delay
+      return true
     }
-    let inst = yapi.getInst(advModel);
-    let data = await inst.get(interfaceId);
+    let inst = yapi.getInst(advModel)
+    let data = await inst.get(interfaceId)
 
     if (!data || !data.enable || !data.mock_script) {
-      return context;
+      return context
     }
 
     // mock 脚本
-    let script = data.mock_script;
-    yapi.commons.handleMockScript(script, context);
-  });
-};
+    let script = data.mock_script
+    yapi.commons.handleMockScript(script, context)
+  })
+}

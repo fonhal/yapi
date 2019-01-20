@@ -89,6 +89,10 @@ var hooks = {
     type: 'multi',
     listener: []
   },
+  advmock_add:{
+    type: 'multi',
+    listener:[]
+  },
   /**
      * 导出 markdown 数据
      * @param context Object
