@@ -213,7 +213,7 @@ module.exports = function() {
 
     let caseInst = yapi.getInst(caseModel)
     findRepeat = await caseInst.get(findRepeatParams)
-    if (findRepeat && findRepeat.res_body === JSON.stringify(params.res_body_data)) {
+    if (findRepeat && findRepeat.res_body && (params.res_body_data.code === findRepeat.res_body.code || params.res_body_data.ErrCode === findRepeat.res_body.ErrCode)) {
       console.log('期望已经存在，不添加新的期望。。。。')
       return
     }

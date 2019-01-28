@@ -43,14 +43,13 @@ function handleHeaders(values) {
       })
     }
   } else if (values.req_body_type === 'json') {
-    values.req_headers
-      ? values.req_headers.map(item => {
-          if (item.name === 'Content-Type') {
-            item.value = 'application/json'
-            isHavaContentType = true
-          }
-        })
-      : []
+    values.req_headers ?
+      values.req_headers.map(item => {
+        if (item.name === 'Content-Type') {
+          item.value = 'application/json'
+          isHavaContentType = true
+        }
+      }) : []
     if (isHavaContentType === false) {
       values.req_headers = values.req_headers || []
       values.req_headers.unshift({
@@ -80,43 +79,35 @@ class interfaceController extends baseController {
     const addAndUpCommonField = {
       desc: 'string',
       status: 'string',
-      req_query: [
-        {
-          name: 'string',
-          value: 'string',
-          example: 'string',
-          desc: 'string',
-          required: 'string'
-        }
-      ],
-      req_headers: [
-        {
-          name: 'string',
-          value: 'string',
-          example: 'string',
-          desc: 'string',
-          required: 'string'
-        }
-      ],
+      req_query: [{
+        name: 'string',
+        value: 'string',
+        example: 'string',
+        desc: 'string',
+        required: 'string'
+      }],
+      req_headers: [{
+        name: 'string',
+        value: 'string',
+        example: 'string',
+        desc: 'string',
+        required: 'string'
+      }],
       req_body_type: 'string',
-      req_params: [
-        {
-          name: 'string',
-          example: 'string',
-          desc: 'string'
-        }
-      ],
-      req_body_form: [
-        {
-          name: 'string',
-          type: {
-            type: 'string'
-          },
-          example: 'string',
-          desc: 'string',
-          required: 'string'
-        }
-      ],
+      req_params: [{
+        name: 'string',
+        example: 'string',
+        desc: 'string'
+      }],
+      req_body_form: [{
+        name: 'string',
+        type: {
+          type: 'string'
+        },
+        example: 'string',
+        desc: 'string',
+        required: 'string'
+      }],
       req_body_other: 'string',
       res_body_type: 'string',
       res_body: 'string',
@@ -128,8 +119,7 @@ class interfaceController extends baseController {
     }
 
     this.schemaMap = {
-      add: Object.assign(
-        {
+      add: Object.assign({
           '*project_id': 'number',
           '*path': minLengthStringField,
           '*title': minLengthStringField,
@@ -138,8 +128,7 @@ class interfaceController extends baseController {
         },
         addAndUpCommonField
       ),
-      up: Object.assign(
-        {
+      up: Object.assign({
           '*id': 'number',
           project_id: 'number',
           path: minLengthStringField,
@@ -152,8 +141,7 @@ class interfaceController extends baseController {
         },
         addAndUpCommonField
       ),
-      save: Object.assign(
-        {
+      save: Object.assign({
           project_id: 'number',
           catid: 'number',
           title: minLengthStringField,
@@ -589,8 +577,7 @@ class interfaceController extends baseController {
       }
     }
 
-    let data = Object.assign(
-      {
+    let data = Object.assign({
         up_time: yapi.commons.time()
       },
       params
@@ -697,9 +684,45 @@ class interfaceController extends baseController {
     return 1
   }
 
-  async addWithoutPerm(ctx) {
-    let params = ctx.params
 
+  /**
+   * 编辑接口
+   * @interface /interface/upapi
+   * @method POST
+   * @category interface
+   * @foldnumber 10
+   * @param {Number}   id 接口id，不能为空
+   * @param {String}   [path] 接口请求路径
+   * @param {String}   [method] 请求方式
+   * @param {Array}  [req_headers] 请求的header信息
+   * @param {String}  [req_headers[].name] 请求的header信息名
+   * @param {String}  [req_headers[].value] 请求的header信息值
+   * @param {Boolean}  [req_headers[].required] 是否是必须，默认为否
+   * @param {String}  [req_headers[].desc] header描述
+   * @param {String}  [req_body_type] 请求参数方式，有["form", "json", "text", "xml"]四种
+   * @param {Mixed}  [req_body_form] 请求参数,如果请求方式是form，参数是Array数组，其他格式请求参数是字符串
+   * @param {String} [req_body_form[].name] 请求参数名
+   * @param {String} [req_body_form[].value] 请求参数值，可填写生成规则（mock）。如@email，随机生成一条email
+   * @param {String} [req_body_form[].type] 请求参数类型，有["text", "file"]两种
+   * @param {String} [req_body_other]  非form类型的请求参数可保存到此字段
+   * @param {String}  [res_body_type] 相应信息的数据格式，有["json", "text", "xml"]三种
+   * @param {String} [res_body] 响应信息，可填写任意字符串，如果res_body_type是json,则会调用mock功能
+   * @param  {String} [desc] 接口描述
+   * @returns {Object}
+   * @example ./api/interface/up.json
+   */
+  async upapi(ctx) {
+    let params = Object.assign(ctx.params, JSON.parse(ctx.request.body || '{}'))
+    let project = await this.projectModel.getBySysId(params.sysid)
+    if (!project) {
+      return (ctx.body = yapi.commons.resReturn(null, 400, '不存在的系统，请创建系统后再上报接口!'))
+    }
+    params.project_id = project.id
+    let interfaceCat = await this.catModel.getByProjectId(project.id)
+    if (!interfaceCat) {
+      return (ctx.body = yapi.commons.resReturn(null, 400, '系统下未创建分类，请创建默认公共分类后再上报接口！'))
+    }
+    params.catid = interfaceCat.id
     params.method = (params.method || 'GET').toUpperCase()
     params.message = (params.message || '').replace(/\n/g, '<br>')
     params.res_body_is_json_schema = _.isUndefined(params.res_body_is_json_schema) ? false : params.res_body_is_json_schema
@@ -747,15 +770,17 @@ class interfaceController extends baseController {
       path: params.path,
       method: params.method
     })
+    let state = 0
     let result = {}
     if (interfaceData) {
       if (interfaceData.status === 'undone') {
+        state = 1
         //TODO 检查是否需要更新入口参数和返回参数
-        interfaceData = Object.assign(interfaceData, commonParams)
-        ;['desc', 'markdown', 'method', 'req_body_type', 'res_body_is_json_schema', 'res_body_type', ''].forEach(key => {
+        interfaceData = Object.assign(interfaceData, commonParams);
+        ['desc', 'markdown', 'method', 'req_body_type', 'res_body_is_json_schema', 'res_body_type', ''].forEach(key => {
           interfaceData[key] = data[key] || interfaceData[key] //
-        })
-        ;['req_headers', 'req_query', 'req_params'].forEach(key => {
+        });
+        ['req_headers', 'req_query', 'req_params'].forEach(key => {
           //, 'req_body_form'
           let keyInterfaceData = interfaceData[key],
             keyData = data[key]
@@ -778,8 +803,8 @@ class interfaceController extends baseController {
             }
           }
           interfaceData[key] = keyInterfaceData
-        })
-        ;['res_body'].forEach(key => {
+        });
+        ['res_body'].forEach(key => {
           let keyInterfaceObj = interfaceData[key],
             keyDataObj = data[key]
           if (!keyInterfaceObj) {
@@ -795,6 +820,7 @@ class interfaceController extends baseController {
         yapi.emitHook('interface_update', interfaceData._id).then()
       }
     } else {
+      state = 2
       result = await this.Model.save(data)
       interfaceData = await this.Model.getByCondition({
         project_id: params.project_id,
@@ -803,79 +829,50 @@ class interfaceController extends baseController {
       })
       yapi.emitHook('interface_add', result).then()
     }
-    let { res_body_data, title, req_body_form, req_query } = data
-    let { _id, project_id } = interfaceData
-    yapi.emitHook('advmock_add', {
-      interface_id: _id,
-      project_id,
+    let {
       res_body_data,
-      name: title,
-      uid,
-      params: req_body_form || req_query
-    })
-
-    this.catModel.get(params.catid).then(cate => {
-      let username = 'dev'
-      let title = `<a href="/user/profile/${uid}">${username}</a> 为分类 <a href="/project/${params.project_id}/interface/api/cat_${params.catid}">${
-        cate.name
-      }</a> ${interfaceData ? '更新' : '添加'}了接口 <a href="/project/${params.project_id}/interface/api/${result._id}">${data.title}</a> `
-
-      yapi.commons.saveLog({
-        content: title,
-        type: 'project',
-        uid: uid,
-        username: username,
-        typeid: params.project_id
+      title,
+      req_body_form,
+      req_query
+    } = data
+    let {
+      _id,
+      project_id
+    } = interfaceData
+    if (title) {
+      yapi.emitHook('advmock_add', {
+        interface_id: _id,
+        project_id,
+        res_body_data,
+        name: title,
+        uid,
+        params: req_body_form || req_query
       })
-      this.projectModel
-        .up(params.project_id, {
-          up_time: new Date().getTime()
+    }
+
+    if (state > 0) {
+      this.catModel.get(params.catid).then(cate => {
+        let username = 'dev'
+        let title = `<a href="/user/profile/${uid}">${username}</a> 为分类 <a href="/project/${params.project_id}/interface/api/cat_${params.catid}">${
+        cate.name
+      }</a> ${state===1 ? '更新' : '添加'}了接口 <a href="/project/${params.project_id}/interface/api/${_id}">${data.title}</a> `
+
+        yapi.commons.saveLog({
+          content: title,
+          type: 'project',
+          uid: uid,
+          username: username,
+          typeid: params.project_id
         })
-        .then()
-    })
-
+        this.projectModel
+          .up(params.project_id, {
+            up_time: new Date().getTime()
+          })
+          .then()
+      })
+    }
     ctx.body = yapi.commons.resReturn(result)
-  }
-
-  /**
-   * 编辑接口
-   * @interface /interface/upapi
-   * @method POST
-   * @category interface
-   * @foldnumber 10
-   * @param {Number}   id 接口id，不能为空
-   * @param {String}   [path] 接口请求路径
-   * @param {String}   [method] 请求方式
-   * @param {Array}  [req_headers] 请求的header信息
-   * @param {String}  [req_headers[].name] 请求的header信息名
-   * @param {String}  [req_headers[].value] 请求的header信息值
-   * @param {Boolean}  [req_headers[].required] 是否是必须，默认为否
-   * @param {String}  [req_headers[].desc] header描述
-   * @param {String}  [req_body_type] 请求参数方式，有["form", "json", "text", "xml"]四种
-   * @param {Mixed}  [req_body_form] 请求参数,如果请求方式是form，参数是Array数组，其他格式请求参数是字符串
-   * @param {String} [req_body_form[].name] 请求参数名
-   * @param {String} [req_body_form[].value] 请求参数值，可填写生成规则（mock）。如@email，随机生成一条email
-   * @param {String} [req_body_form[].type] 请求参数类型，有["text", "file"]两种
-   * @param {String} [req_body_other]  非form类型的请求参数可保存到此字段
-   * @param {String}  [res_body_type] 相应信息的数据格式，有["json", "text", "xml"]三种
-   * @param {String} [res_body] 响应信息，可填写任意字符串，如果res_body_type是json,则会调用mock功能
-   * @param  {String} [desc] 接口描述
-   * @returns {Object}
-   * @example ./api/interface/up.json
-   */
-  async upapi(ctx) {
-    let params = Object.assign(ctx.params, JSON.parse(ctx.request.body || '{}'))
-    let project = await this.projectModel.getBySysId(params.sysid)
-    if (!project) {
-      return (ctx.body = yapi.commons.resReturn(null, 400, '不存在的系统，请创建系统后再上报接口!'))
-    }
-    params.project_id = project.id
-    let interfaceCat = await this.catModel.getByProjectId(project.id)
-    if (!interfaceCat) {
-      return (ctx.body = yapi.commons.resReturn(null, 400, '系统下未创建分类，请创建默认公共分类后再上报接口！'))
-    }
-    params.catid = interfaceCat.id
-    this.addWithoutPerm(ctx)
+    return 1
   }
 
   diffHTML(html) {
