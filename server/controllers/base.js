@@ -6,6 +6,7 @@ const groupModel = require('../models/group.js');
 const tokenModel = require('../models/token.js');
 const _ = require('underscore');
 const jwt = require('jsonwebtoken');
+const {parseToken} = require('../utils/token')
 
 class baseController {
   constructor(ctx) {
@@ -39,37 +40,66 @@ class baseController {
 
     let openApiRouter = [
       '/api/open/run_auto_test',
-      '/api/open/import_data',
-      '/api/interface/add',
-      '/api/interface/save',
-      '/api/interface/up',
-      '/api/interface/add_cat'
+			'/api/open/import_data',
+			'/api/interface/add',
+			'/api/interface/save',
+			'/api/interface/up',
+			'/api/interface/get',
+			'/api/interface/list',
+			'/api/interface/list_menu',
+			'/api/interface/add_cat',
+			'/api/interface/getCatMenu'
     ];
 
     let params = Object.assign({}, ctx.query, ctx.request.body);
     let token = params.token;
 
     if (token && openApiRouter.indexOf(ctx.path) > -1) {
-      if (this.$auth) {
-        ctx.params.project_id = await this.getProjectIdByToken(token);
+      let tokens = parseToken(token)
 
-        if (!ctx.params.project_id) {
-          return (this.$tokenAuth = false);
-        }
-        return (this.$tokenAuth = true);
+      const oldTokenUid = '999999'
+
+      let tokenUid = oldTokenUid;
+
+      if(!tokens){
+        let checkId = await this.getProjectIdByToken(token);
+        if(!checkId)return;
+      }else{
+        token = tokens.projectToken;
+        tokenUid = tokens.uid;
       }
 
+      // if (this.$auth) {
+      //   ctx.params.project_id = await this.getProjectIdByToken(token);
+
+      //   if (!ctx.params.project_id) {
+      //     return (this.$tokenAuth = false);
+      //   }
+      //   return (this.$tokenAuth = true);
+      // }
+
       let checkId = await this.getProjectIdByToken(token);
+      if(!checkId){
+        ctx.body = yapi.commons.resReturn(null, 42014, 'token 无效');
+      }
       let projectData = await this.projectModel.get(checkId);
       if (projectData) {
         ctx.params.project_id = checkId;
         this.$tokenAuth = true;
-        this.$uid = '999999';
-        this.$user = {
-          _id: this.$uid,
-          role: 'member',
-          username: 'system'
-        };
+        this.$uid = tokenUid;
+        let result;
+        if(tokenUid === oldTokenUid){
+          result = {
+            _id: tokenUid,
+            role: 'member',
+            username: 'system'
+          }
+        }else{
+          let userInst = yapi.getInst(userModel); //创建user实体
+          result = await userInst.findById(tokenUid);
+        }
+        
+        this.$user = result;
         this.$auth = true;
       }
     }

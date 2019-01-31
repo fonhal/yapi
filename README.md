@@ -58,8 +58,10 @@ YApi 是<strong>高效</strong>、<strong>易用</strong>、<strong>功能强大
 * 艺龙 
 * 美团
 * 百度
+* 腾讯
 * 阿里巴巴
 * 京东
+* 今日头条
 * 唯品支付 
 * 链家网
 * 快手
@@ -69,10 +71,11 @@ YApi 是<strong>高效</strong>、<strong>易用</strong>、<strong>功能强大
 
 ### Authors
 * [hellosean1025](https://github.com/hellosean1025)
+* [gaoxiaomumu](https://github.com/gaoxiaomumu)
 * [zwjamnsss](https://github.com/amnsss)
 * [dwb1994](https://github.com/dwb1994)
 * [fungezi](https://github.com/fungezi)
-* [gaoxiaomumu](https://github.com/gaoxiaomumu)
+
 
 ### License
 Apache License 2.0

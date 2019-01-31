@@ -13,7 +13,7 @@ const logModel = require('../models/log.js');
 const followModel = require('../models/follow.js');
 const tokenModel = require('../models/token.js');
 const url = require('url');
-
+const {getToken} = require('../utils/token')
 const sha = require('sha.js');
 
 class projectController extends baseController {
@@ -32,7 +32,7 @@ class projectController extends baseController {
       type: 'string',
       minLength: 1
     };
-    const code = {
+    const sysid = {
       type: 'string',
       minLength: 3
     }
@@ -60,7 +60,7 @@ class projectController extends baseController {
     this.schemaMap = {
       add: {
         '*name': name,
-        'code': code,
+        'sysid': sysid,
         basepath: basepath,
         '*group_id': group_id,
         group_name,
@@ -182,7 +182,7 @@ class projectController extends baseController {
    * @category project
    * @foldnumber 10
    * @param {String} name 项目名称，不能为空
-   * @param {String} code 项目代码，不能为空
+   * @param {String} sysid 项目代码，不能为空
    * @param {String} basepath 项目基本路径，不能为空
    * @param {Number} group_id 项目分组id，不能为空
    * @param {Number} group_name 项目分组名称，不能为空
@@ -212,7 +212,7 @@ class projectController extends baseController {
 
     let data = {
       name: params.name,
-      code: params.code,
+      sysid: params.sysid,
       desc: params.desc,
       basepath: params.basepath,
       members: [],
@@ -783,7 +783,7 @@ class projectController extends baseController {
 
       params = yapi.commons.handleParams(params, {
         name: 'string',
-        code: 'string',
+        sysid: 'string',
         basepath: 'string',
         group_id: 'number',
         desc: 'string',
@@ -1012,10 +1012,13 @@ class projectController extends baseController {
           .update(passsalt)
           .digest('hex')
           .substr(0, 20);
+
         await this.tokenModel.save({ project_id, token });
       } else {
         token = data.token;
       }
+
+      token = getToken(token, this.getUid())
 
       ctx.body = yapi.commons.resReturn(token);
     } catch (err) {
@@ -1045,6 +1048,7 @@ class projectController extends baseController {
           .digest('hex')
           .substr(0, 20);
         result = await this.tokenModel.up(project_id, token);
+        token = getToken(token);
         result.token = token;
       } else {
         ctx.body = yapi.commons.resReturn(null, 402, '没有查到token信息');
@@ -1084,7 +1088,7 @@ class projectController extends baseController {
     let projectRules = [
       '_id',
       'name',
-      'code',
+      'sysid',
       'basepath',
       'uid',
       'env',
